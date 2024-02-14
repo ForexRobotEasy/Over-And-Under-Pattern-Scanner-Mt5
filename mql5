@@ -1,0 +1,69 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                                      Over And Under Pattern Scanner Mt5 |
+//|                               Copyright © 2022, Forex Robot Easy Team |
+//|                                           https://www.forexroboteasy.com |
+//+------------------------------------------------------------------+
+
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                         |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+    //--- indicator buffers mapping
+    if (ArrayResize(Buffer1,1)==0) {Print('ArrayResize error'); return(INIT_FAILED);}
+    if (ArrayResize(Buffer2,1)==0) {Print('ArrayResize error'); return(INIT_FAILED);}
+    //---
+    
+    //--- indicator buffers mapping
+    SetIndexBuffer(0, Buffer1);
+    SetIndexBuffer(1, Buffer2);
+    //---
+    
+    //--- setting indicator line properties
+    SetIndexStyle(0,DRAW_LINE);
+    SetIndexStyle(1,DRAW_LINE);
+    
+    //--- name for DataWindow and indicator subwindow label
+    IndicatorSetString(INDICATOR_SHORTNAME,'Over And Under Pattern Scanner Mt5');
+    
+    //---
+    return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                              |
+//+------------------------------------------------------------------+
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
+{
+    int limit = rates_total - prev_calculated;
+    
+    for(int i = prev_calculated; i < rates_total; i++)
+    {
+        //--- Check for Over pattern
+        if(high[i] > high[i-1] && high[i] > high[i+1] && low[i] > low[i-1] && low[i] > low[i+1])
+        {
+            Buffer1[i] = high[i];
+            Buffer2[i] = low[i];
+        }
+        
+        //--- Check for Under pattern
+        if(high[i] < high[i-1] && high[i] < high[i+1] && low[i] < low[i-1] && low[i] < low[i+1])
+        {
+            Buffer1[i] = low[i];
+            Buffer2[i] = high[i];
+        }
+    }
+    
+    //--- return value of prev_calculated for next call
+    return(rates_total);
+}
